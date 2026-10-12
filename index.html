@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NFL Pick Pool</title>
+<style>
+:root{--bg:#f4f4f1;--card:#fff;--tx:#161718;--mu:#62666d;--bd:#d9d8d2;--win:#0b7a48;--wint:#fff;--loss:#b3261e;--on:#161718;--onx:#f4f4f1;--gold:#ffc400}
+@media (prefers-color-scheme:dark){:root{--bg:#121413;--card:#1b1e1c;--tx:#eceeea;--mu:#a3a8a1;--bd:#3a3f3d;--win:#4cc38a;--wint:#06130d;--loss:#ff8a80;--on:#eceeea;--onx:#121413}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+[hidden]{display:none!important}
+.app{display:flex;align-items:flex-start;min-height:100vh}
+.side{width:150px;flex:none;position:sticky;top:0;padding:16px 10px;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--bd);min-height:100vh}
+main{flex:1;min-width:0}
+.wrap{max-width:780px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:0 0 2px}h2{font-size:16px;margin:0 0 8px}
+.sub,.mu{color:var(--mu);font-size:13px}.small{font-size:12px}.pad{padding:30px 0;text-align:center}
+.err{color:var(--loss);font-size:13px;min-height:18px}.ok{color:var(--mu);font-size:13px;min-height:18px}
+button{font:inherit;cursor:pointer;border-radius:8px;padding:9px 14px;border:1.5px solid var(--tx);background:var(--card);color:var(--tx);font-weight:700}
+button.pri{background:var(--on);color:var(--onx)}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
+.tabb{text-align:left;font-size:13px;line-height:1.25;padding:10px 8px;border-width:1.5px;border-color:var(--bd)}
+.tabb.on{background:var(--on);color:var(--onx);border-color:var(--on)}
+.tabb.adm{margin-top:auto;font-weight:500;color:var(--mu);border-style:dashed}
+.tabb.adm.on{color:var(--onx)}
+input,textarea,select{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;width:100%;margin-bottom:8px}
+textarea{min-height:110px;resize:vertical}
+input.n{width:70px;margin:0;padding:6px}input.st{width:110px;margin:0;padding:6px}select.sl{width:auto}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:12px 0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.card.sp{border:2px solid var(--gold);box-shadow:0 0 14px rgba(255,196,0,.4)}
+.mt{font-size:17px;font-weight:700}.ln{color:var(--mu);font-size:13px}
+.pk{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pb{font-weight:600;padding:7px 11px;border-color:var(--bd)}
+.pb.on{background:var(--on);color:var(--onx);border-color:var(--on)}
+.pb.gold{background:var(--gold);color:#111;border-color:var(--gold);font-weight:800}
+.tw{overflow-x:auto;border:1px solid var(--bd);border-radius:12px;background:var(--card);margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--bd);text-align:center;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:1}
+tr.sum td{font-weight:700;background:var(--bg)}
+td.c{font-weight:600}td.w{background:var(--win);color:var(--wint)}td.l{background:var(--loss);color:var(--wint)}
+td.s{box-shadow:inset 0 0 0 2px var(--gold)}
+td.dim{background:var(--bg);color:var(--mu);font-weight:400;opacity:.6}
+td small{display:block;color:var(--mu);font-weight:400;font-size:11px}
+.s9{display:block;margin:2px auto 0;width:max-content;background:var(--gold);color:#111;font-size:9px;font-weight:800;border-radius:4px;padding:0 4px}
+.s9.dim{background:var(--bd);color:var(--mu)}
+.pn{display:inline-block;cursor:pointer;border:1px solid var(--on);background:var(--on);color:var(--onx);border-radius:8px;padding:3px 10px;font-weight:700;user-select:none}
+.pn.off{background:transparent;color:var(--mu);border-color:var(--bd);text-decoration:line-through;font-weight:500}
+.hw{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
+.lab{font-size:12px;color:var(--mu);margin:14px 0 4px}
+.ar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.ar span{min-width:150px;font-weight:600}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.mb{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;max-width:360px;width:100%}
+.mb .row{margin-top:14px;justify-content:flex-end}
+@media (max-width:700px){
+.app{flex-direction:column;align-items:stretch}
+.side{width:100%;flex-direction:row;min-height:0;border-right:0;border-bottom:1px solid var(--bd);padding:8px;gap:6px;z-index:5;background:var(--bg)}
+.tabb{flex:1;text-align:center;padding:9px 4px;font-size:12px}
+.tabb.adm{margin-top:0;flex:0 0 auto}
+}
+</style></head><body>
+<div class="app">
+<nav class="side">
+<button class="tabb on" data-v="submit">Submit Picks</button>
+<button class="tabb" data-v="cmp">Compare My Picks</button>
+<button class="tabb" data-v="hist">History</button>
+<button class="tabb adm" data-v="admin">Admin</button>
+</nav>
+<main><div class="wrap">
+<div id="net" class="err"></div>
+
+<section id="v-submit">
+<h1>NFL Pick Pool</h1>
+<div class="sub" id="wkl"></div>
+<div class="box">
+<input id="nm" placeholder="Your name" maxlength="40" autocomplete="name">
+<input id="pin" placeholder="Choose a PIN (4+ characters)" maxlength="30" autocomplete="off">
+<div class="mu small" style="margin-bottom:8px">You need this PIN to change or delete your picks later.</div>
+<div class="row"><button class="pri" id="go">Submit Picks</button><button id="del">Delete submission</button></div>
+<div id="msg" class="err"></div>
+</div>
+<div id="form"></div>
+<button class="pri" id="go2" style="margin:6px 0 30px">Submit Picks</button>
+</section>
+
+<section id="v-cmp" hidden>
+<h1>Compare My Picks</h1>
+<div class="row" style="margin:6px 0 10px"><button id="rf">Refresh</button><span class="mu" id="cwk"></span></div>
+<div id="cmp"></div>
+</section>
+
+<section id="v-hist" hidden>
+<h1>History</h1>
+<div class="row" style="margin:6px 0 10px"><button id="rf2">Refresh</button><span class="mu">Season totals and every saved week.</span></div>
+<div id="hist"></div>
+</section>
+
+<section id="v-admin" hidden>
+<h1>Admin</h1>
+<div id="alogin" class="box">
+<h2>Sign in</h2>
+<input id="ae" type="email" placeholder="Email" autocomplete="username">
+<input id="ap" type="password" placeholder="Password" autocomplete="current-password">
+<button class="pri" id="ali">Sign in</button>
+<div id="amsg" class="err"></div>
+</div>
+<div id="apanel" hidden>
+<div class="row"><span id="awho" class="mu"></span><button id="aout">Sign out</button></div>
+<div class="box"><h2>Week</h2><select id="aw" class="sl"></select></div>
+<div class="box">
+<h2>Schedule</h2>
+<div class="mu small" style="margin-bottom:8px">One game per line: Away | Home | home or away (who is favored) | spread | total (optional)</div>
+<textarea id="ascr"></textarea>
+<button class="pri" id="asave">Save schedule</button>
+<div id="asm" class="ok"></div>
+</div>
+<div class="box">
+<h2>Results</h2>
+<textarea id="apaste" placeholder="Optional paste: Away | Home | away score | home score | final or live | status"></textarea>
+<button id="aimp">Fill from paste</button>
+<div id="ares" style="margin-top:10px"></div>
+<button class="pri" id="arsave">Save results</button>
+<div id="arm" class="ok"></div>
+</div>
+<div class="box"><h2>Submissions</h2><div id="asubs"></div></div>
+</div>
+</section>
+</div></main></div>
+
+<script>
+const URL_="https://tvuefpeicqrkpnyprnnf.supabase.co",KEY="sb_publishable_doMHNA3ChooAxvKAK9YC7A_AqAl8kb0";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const short=n=>String(n||"").trim().split(/\s+/).pop();
+const nk=n=>String(n||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+function curWeek(){const d=new Date();d.setHours(0,0,0,0);const days=Math.round((d-new Date(2026,8,8))/864e5);return Math.min(18,Math.max(1,Math.floor(days/7)+1))}
+const WK=curWeek();
+let TOKEN=null;try{TOKEN=sessionStorage.getItem("np_tok")}catch(e){}
+let SCH=[],RES=[],SUB=[],OFF=new Set(),view="submit",PICKS={},AEMAIL="";
+try{PICKS=JSON.parse(localStorage.getItem("np_d_"+WK)||"{}")}catch(e){PICKS={}}
+
+async function api(path,o={}){
+  const h={apikey:KEY,"Content-Type":"application/json"};
+  if(o.auth&&TOKEN)h.Authorization="Bearer "+TOKEN;
+  if(o.prefer)h.Prefer=o.prefer;
+  const r=await fetch(URL_+path,{method:o.method||"GET",headers:h,body:o.body!==undefined?JSON.stringify(o.body):undefined});
+  const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
+  if(!r.ok){
+    if(r.status===401&&o.auth){TOKEN=null;try{sessionStorage.removeItem("np_tok")}catch(e){}renderAdmin()}
+    throw new Error((j&&(j.message||j.msg||j.error_description||j.error))||"Request failed ("+r.status+")");
+  }
+  return j;
+}
+const say=(id,t,ok)=>{const e=$(id);e.className=ok?"ok":"err";e.textContent=t};
+const gamesOf=w=>SCH.filter(g=>g.week===w).sort((a,b)=>a.idx-b.idx);
+const resOf=(w,g)=>RES.find(r=>r.week===w&&r.away===g.away&&r.home===g.home);
+const gk=g=>g.away+"|"+g.home;
+const sl=(g,s)=>+g.spread===0?"PK":(g.fav===s?"-":"+")+g.spread;
+
+function grade(g,r,p){
+  if(!r||!r.final||r.away_score==null||r.home_score==null||!p||!p.pick)return null;
+  const a=+r.away_score,h=+r.home_score;
+  if(p.pick==="over"||p.pick==="under"){const t=parseFloat(g.total);if(isNaN(t))return null;const s=a+h;return s===t?0:((s>t)===(p.pick==="over")?1:-1)}
+  const v=(h-a)+(g.fav==="home"?-1:1)*(+g.spread);
+  return v===0?0:((v>0)===(p.pick==="home")?1:-1);
+}
+function ask(t,yes){return new Promise(res=>{const o=document.createElement("div");o.className="mo";o.innerHTML='<div class="mb"><div>'+esc(t)+'</div><div class="row"><button id="nn">Cancel</button><button class="pri" id="yy">'+esc(yes||"OK")+'</button></div></div>';document.body.appendChild(o);const done=v=>{o.remove();res(v)};o.querySelector("#yy").onclick=()=>done(true);o.querySelector("#nn").onclick=()=>done(false);o.onclick=e=>{if(e.target===o)done(false)}})}
+
+async function loadAll(){
+  try{
+    const [a,b,c]=await Promise.all([api("/rest/v1/schedule?select=*&order=week,idx"),api("/rest/v1/results?select=*"),api("/rest/v1/submissions_public?select=*&order=updated_at")]);
+    SCH=a;RES=b;SUB=c;
+  }catch(e){$("net").textContent="Couldn't load data: "+e.message;return}
+  $("net").textContent="";renderAll();
+}
+function renderAll(){renderForm();renderCmp();renderHist();renderAdmin()}
+
+/* ---------- Submit ---------- */
+function renderForm(){
+  $("wkl").textContent="Week "+WK+" · tap your pick for each game, and SPECIAL for a double-value pick.";
+  const gs=gamesOf(WK),el=$("form");
+  $("go2").hidden=!gs.length;
+  if(!gs.length){el.innerHTML='<div class="mu pad">No schedule posted for Week '+WK+' yet. Check back soon.</div>';return}
+  el.innerHTML=gs.map(g=>{
+    const p=PICKS[gk(g)]||{};
+    const opts=[["away",short(g.away)+" "+sl(g,"away")],["home",short(g.home)+" "+sl(g,"home")]];
+    if(parseFloat(g.total)>0)opts.push(["over","Over "+g.total],["under","Under "+g.total]);
+    return `<div class="card${p.special?" sp":""}" data-k="${esc(gk(g))}"><div class="mt">${esc(short(g.away))} @ ${esc(short(g.home))}</div><div class="ln">${esc(g.line||"")}</div><div class="pk">${opts.map(([k,t])=>`<button class="pb${p.pick===k?" on":""}" data-p="${k}">${esc(t.trim())}</button>`).join("")}<button class="pb${p.special?" gold":""}" data-s="1">SPECIAL</button></div></div>`}).join("");
+}
+$("form").onclick=e=>{
+  const c=e.target.closest(".card");if(!c)return;
+  const k=c.dataset.k,p=PICKS[k]||(PICKS[k]={});
+  const pb=e.target.closest("[data-p]");
+  if(pb){p.pick=p.pick===pb.dataset.p?null:pb.dataset.p;c.querySelectorAll("[data-p]").forEach(b=>b.classList.toggle("on",b.dataset.p===p.pick))}
+  const sb=e.target.closest("[data-s]");
+  if(sb){p.special=!p.special;sb.classList.toggle("gold",!!p.special);c.classList.toggle("sp",!!p.special)}
+  try{localStorage.setItem("np_d_"+WK,JSON.stringify(PICKS))}catch(x){}
+};
+try{$("nm").value=localStorage.getItem("np_name")||""}catch(e){}
+$("nm").oninput=e=>{try{localStorage.setItem("np_name",e.target.value)}catch(x){}};
+async function submit(){
+  const name=$("nm").value.trim(),pin=$("pin").value;
+  const picks=gamesOf(WK).filter(g=>(PICKS[gk(g)]||{}).pick).map(g=>({away:g.away,home:g.home,pick:PICKS[gk(g)].pick,special:!!PICKS[gk(g)].special}));
+  if(!name){say("msg","Enter your name first.");return}
+  if(pin.length<4){say("msg","Choose a PIN of at least 4 characters.");return}
+  if(!picks.length){say("msg","Pick at least one game first.");return}
+  $("go").disabled=$("go2").disabled=true;say("msg","Submitting…",true);
+  try{
+    let r=await api("/rest/v1/rpc/submit_picks",{method:"POST",body:{p_week:WK,p_name:name,p_pin:pin,p_picks:picks,p_replace:false}});
+    if(r==="exists"){
+      if(!(await ask("You already submitted Week "+WK+" picks as "+name+". Do you wish to replace your previous submission?","Replace"))){say("msg","Cancelled. Your previous submission is unchanged.",true);$("go").disabled=$("go2").disabled=false;return}
+      r=await api("/rest/v1/rpc/submit_picks",{method:"POST",body:{p_week:WK,p_name:name,p_pin:pin,p_picks:picks,p_replace:true}});
+    }
+    say("msg","Submitted "+picks.length+" picks for Week "+WK+" as "+name+".",true);
+    await loadAll();
+  }catch(e){say("msg",e.message)}
+  $("go").disabled=$("go2").disabled=false;
+}
+$("go").onclick=submit;$("go2").onclick=submit;
+$("del").onclick=async()=>{
+  const name=$("nm").value.trim(),pin=$("pin").value;
+  if(!name||!pin){say("msg","Enter the name and PIN of the submission to delete.");return}
+  if(!(await ask("Delete the Week "+WK+" submission for "+name+"? This can't be undone.","Delete")))return;
+  try{await api("/rest/v1/rpc/delete_submission",{method:"POST",body:{p_week:WK,p_name:name,p_pin:pin}});say("msg","Deleted the Week "+WK+" submission for "+name+".",true);await loadAll()}
+  catch(e){say("msg",e.message)}
+};
+
+/* ---------- Compare + History ---------- */
+function stats(w){
+  const gs=gamesOf(w),subs=SUB.filter(s=>s.week===w);
+  if(!subs.length||!gs.length)return null;
+  const st=subs.map(s=>{
+    const m={};let pts=0,wn=0,ls=0,ps=0;
+    (s.picks||[]).forEach(p=>{
+      const g=gs.find(x=>x.away===p.away&&x.home===p.home);if(!g)return;
+      const gr=grade(g,resOf(w,g),p);m[gk(g)]={p,g,gr};
+      if(gr===1){wn++;pts+=p.special?2:1}else if(gr===-1)ls++;else if(gr===0)ps++;
+    });
+    return{key:nk(s.name),name:s.name,m,pts,wn,ls,ps};
+  }).sort((a,b)=>b.pts-a.pts||a.name.localeCompare(b.name));
+  return{gs,st};
+}
+function tableHtml(w,S){
+  const {gs,st}=S,rec=p=>p.wn+"-"+p.ls+(p.ps?"-"+p.ps:"");
+  const d=p=>OFF.has(p.key)?"dim":"";
+  let h='<div class="mu small" style="margin:6px 0">Tap a name to show or hide that person.</div><div class="tw"><table><tr><th>Game</th>'+st.map(p=>`<th><span class="pn${OFF.has(p.key)?" off":""}" data-u="${esc(p.key)}">${esc(p.name)}</span></th>`).join("")+'</tr>';
+  h+='<tr class="sum"><td>Points</td>'+st.map(p=>`<td class="${d(p)}">${p.pts}</td>`).join("")+'</tr>';
+  h+='<tr class="sum"><td>Record</td>'+st.map(p=>`<td class="${d(p)}">${rec(p)}</td>`).join("")+'</tr>';
+  gs.forEach(g=>{
+    const r=resOf(w,g);
+    const s2=r?(r.final?esc(r.away_score+"-"+r.home_score):(r.away_score!=null?esc((r.status||"Live")+" "+r.away_score+"-"+r.home_score):"")):"";
+    h+=`<tr><td>${esc(short(g.away))} @ ${esc(short(g.home))}${s2?"<small>"+s2+"</small>":""}</td>`+st.map(p=>{
+      const c=p.m[gk(g)];if(!c)return'<td class="mu">—</td>';
+      const off=OFF.has(p.key),x=c.p;
+      const nm=x.pick==="home"?short(g.home):x.pick==="away"?short(g.away):(x.pick==="over"?"Over ":"Under ")+g.total;
+      return `<td class="c ${off?"dim":c.gr===1?"w":c.gr===-1?"l":""} ${x.special&&!off?"s":""}">${esc(nm)}${x.special?'<span class="s9'+(off?" dim":"")+'">SPECIAL</span>':""}</td>`}).join("")+'</tr>';
+  });
+  return h+'</table></div>';
+}
+function setHtml(el,h){const a=el.querySelector(".tw"),l=a?a.scrollLeft:0;el.innerHTML=h;const b=el.querySelector(".tw");if(b)b.scrollLeft=l}
+function renderCmp(){
+  $("cwk").textContent="Week "+WK;
+  const S=stats(WK);
+  setHtml($("cmp"),S?tableHtml(WK,S):'<div class="mu pad">No submissions yet for Week '+WK+'.</div>');
+}
+let HW=null;
+function renderHist(){
+  const el=$("hist"),wks=[...new Set(SUB.map(s=>s.week))].sort((a,b)=>b-a);
+  if(!wks.length){el.innerHTML='<div class="mu pad">No submissions saved yet.</div>';return}
+  if(HW==null||!wks.includes(HW))HW=wks[0];
+  const asc=wks.slice().sort((a,b)=>a-b),tot={};
+  asc.forEach(w=>{const S=stats(w);if(!S)return;S.st.forEach(p=>{const t=tot[p.key]||(tot[p.key]={name:p.name,by:{},sum:0,w:0,l:0,t:0});t.name=p.name;t.by[w]=p.pts;t.sum+=p.pts;t.w+=p.wn;t.l+=p.ls;t.t+=p.ps})});
+  const T=Object.values(tot).sort((a,b)=>b.sum-a.sum||a.name.localeCompare(b.name));
+  let h='<div class="lab">Season totals</div><div class="tw"><table><tr><th>Name</th>'+asc.map(w=>`<th>Wk ${w}</th>`).join("")+'<th>Total</th><th>Record</th></tr>';
+  T.forEach(t=>{h+=`<tr><td>${esc(t.name)}</td>`+asc.map(w=>`<td>${t.by[w]==null?"—":t.by[w]}</td>`).join("")+`<td><b>${t.sum}</b></td><td>${t.w}-${t.l}${t.t?"-"+t.t:""}</td></tr>`});
+  h+='</table></div><div class="lab">Past weeks</div><div class="hw">'+wks.map(w=>`<button class="pb${w===HW?" on":""}" data-hw="${w}">Week ${w}${w===WK?" (current)":""}</button>`).join("")+'</div><div id="hwk"></div>';
+  setHtml(el,h);
+  const S=stats(HW);$("hwk").innerHTML=S?tableHtml(HW,S):"";
+}
+function toggleName(e){const t=e.target.closest("[data-u]");if(!t)return;const k=t.dataset.u;OFF.has(k)?OFF.delete(k):OFF.add(k);renderCmp();renderHist()}
+$("cmp").onclick=toggleName;
+$("hist").onclick=e=>{const c=e.target.closest("[data-hw]");if(c){HW=+c.dataset.hw;renderHist();return}toggleName(e)};
+$("rf").onclick=$("rf2").onclick=loadAll;
+
+/* ---------- Admin ---------- */
+const aw=$("aw");for(let i=1;i<=18;i++)aw.add(new Option("Week "+i,i));aw.value=WK;
+function renderAdmin(){
+  $("alogin").hidden=!!TOKEN;$("apanel").hidden=!TOKEN;
+  if(!TOKEN)return;
+  $("awho").textContent=AEMAIL?"Signed in as "+AEMAIL:"Signed in";
+  fillAdminSched();renderAdminRes();renderAdminSubs();
+}
+function fillAdminSched(){
+  const w=+aw.value;
+  $("ascr").value=gamesOf(w).map(g=>[g.away,g.home,g.fav,g.spread].concat(g.total?[g.total]:[]).join(" | ")).join("\n");
+}
+function renderAdminRes(){
+  const w=+aw.value;
+  $("ares").innerHTML=gamesOf(w).map((g,i)=>{const r=resOf(w,g)||{};const live=!r.final&&r.away_score!=null;
+    return `<div class="ar" data-i="${i}"><span>${esc(short(g.away))} @ ${esc(short(g.home))}</span><input class="n" type="number" placeholder="${esc(short(g.away))}" value="${r.away_score??""}"><input class="n" type="number" placeholder="${esc(short(g.home))}" value="${r.home_score??""}"><select class="sl"><option value="">Not started</option><option value="live"${live?" selected":""}>Live</option><option value="final"${r.final?" selected":""}>Final</option></select><input class="st" placeholder="e.g. Q4 2:00" value="${esc(r.final?"":r.status||"")}"></div>`}).join("")||'<div class="mu small">Save a schedule for this week first.</div>';
+}
+function renderAdminSubs(){
+  const w=+aw.value,subs=SUB.filter(s=>s.week===w);
+  $("asubs").innerHTML=subs.map(s=>`<div class="ar"><span>${esc(s.name)}</span><button data-del="${esc(s.id)}" data-n="${esc(s.name)}">Delete</button></div>`).join("")||'<div class="mu small">No submissions for this week.</div>';
+}
+aw.onchange=()=>{fillAdminSched();renderAdminRes();renderAdminSubs()};
+$("ali").onclick=async()=>{
+  const email=$("ae").value.trim(),pw=$("ap").value;
+  try{const r=await api("/auth/v1/token?grant_type=password",{method:"POST",body:{email,password:pw}});
+    TOKEN=r.access_token;AEMAIL=email;try{sessionStorage.setItem("np_tok",TOKEN)}catch(e){}$("ap").value="";say("amsg","",true);renderAdmin()}
+  catch(e){say("amsg",e.message)}
+};
+$("aout").onclick=()=>{TOKEN=null;AEMAIL="";try{sessionStorage.removeItem("np_tok")}catch(e){}renderAdmin()};
+$("asave").onclick=async()=>{
+  const w=+aw.value;let rows;
+  try{
+    rows=$("ascr").value.split("\n").map(l=>l.trim()).filter(Boolean).map((l,i)=>{
+      const p=l.split("|").map(x=>x.trim()),fav=(p[2]||"").toLowerCase(),sp=parseFloat(p[3]);
+      if(p.length<4||!p[0]||!p[1]||(fav!=="home"&&fav!=="away")||isNaN(sp))throw new Error("Line "+(i+1)+": use Away | Home | home or away | spread");
+      const ft=fav==="home"?p[1]:p[0];
+      return{week:w,idx:i,away:p[0],home:p[1],fav,spread:sp,total:p[4]||"",line:sp===0?"Pick'em":short(ft)+" -"+sp};
+    });
+    if(!rows.length)throw new Error("Add at least one game.");
+    $("asave").disabled=true;say("asm","Saving…",true);
+    await api("/rest/v1/schedule?week=eq."+w,{method:"DELETE",auth:true});
+    await api("/rest/v1/schedule",{method:"POST",auth:true,prefer:"return=minimal",body:rows});
+    say("asm","Saved the Week "+w+" schedule ("+rows.length+" games).",true);await loadAll();
+  }catch(e){say("asm",e.message)}
+  $("asave").disabled=false;
+};
+$("aimp").onclick=()=>{
+  const gs=gamesOf(+aw.value);
+  $("apaste").value.split("\n").forEach(l=>{
+    const p=l.split("|").map(x=>x.trim());if(p.length<5)return;
+    const i=gs.findIndex(g=>nk(g.away)===nk(p[0])&&nk(g.home)===nk(p[1]));if(i<0)return;
+    const el=document.querySelector('#ares .ar[data-i="'+i+'"]'),ins=el.querySelectorAll("input");
+    ins[0].value=p[2];ins[1].value=p[3];el.querySelector("select").value=/^f/i.test(p[4])?"final":/^l/i.test(p[4])?"live":"";ins[2].value=p[5]||"";
+  });
+};
+$("arsave").onclick=async()=>{
+  const w=+aw.value,gs=gamesOf(w),rows=[];
+  document.querySelectorAll("#ares .ar").forEach(el=>{
+    const g=gs[+el.dataset.i],ins=el.querySelectorAll("input"),sel=el.querySelector("select").value;
+    if(!sel&&ins[0].value===""&&ins[1].value==="")return;
+    rows.push({week:w,away:g.away,home:g.home,away_score:ins[0].value===""?null:+ins[0].value,home_score:ins[1].value===""?null:+ins[1].value,final:sel==="final",status:sel==="final"?"Final":(ins[2].value.trim()||(sel==="live"?"Live":""))});
+  });
+  if(!rows.length){say("arm","Enter at least one score first.");return}
+  $("arsave").disabled=true;say("arm","Saving…",true);
+  try{await api("/rest/v1/results?on_conflict=week,away,home",{method:"POST",auth:true,prefer:"resolution=merge-duplicates,return=minimal",body:rows});say("arm","Saved "+rows.length+" results.",true);await loadAll()}
+  catch(e){say("arm",e.message)}
+  $("arsave").disabled=false;
+};
+$("asubs").onclick=async e=>{
+  const b=e.target.closest("[data-del]");if(!b)return;
+  if(!(await ask("Delete "+b.dataset.n+"'s submission?","Delete")))return;
+  try{await api("/rest/v1/submissions?id=eq."+encodeURIComponent(b.dataset.del),{method:"DELETE",auth:true});await loadAll()}
+  catch(err){say("asm",err.message)}
+};
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{
+  view=b.dataset.v;
+  document.querySelectorAll("[data-v]").forEach(x=>x.classList.toggle("on",x===b));
+  ["submit","cmp","hist","admin"].forEach(v=>$("v-"+v).hidden=v!==view);
+  if(view!=="submit")loadAll();
+});
+setInterval(()=>{if(view==="cmp"||view==="hist")loadAll()},45000);
+renderAdmin();loadAll();
+</script></body></html>
