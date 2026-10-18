@@ -245,7 +245,7 @@ function stats(w){
   return{gs,st};
 }
 function tableHtml(w,S){
-  const {gs,st}=S,rec=p=>p.wn+"-"+p.ls+(p.ps?"-"+p.ps:"");
+  const gs=S.gs,st=S.st.slice().sort((a,b)=>OFF.has(a.key)-OFF.has(b.key)),rec=p=>p.wn+"-"+p.ls+(p.ps?"-"+p.ps:"");
   const d=p=>OFF.has(p.key)?"dim":"";
   let h='<div class="mu small" style="margin:6px 0">Tap a name to show or hide that person.</div><div class="tw"><table><tr><th>Game</th>'+st.map(p=>`<th><span class="pn${OFF.has(p.key)?" off":""}" data-u="${esc(p.key)}">${esc(p.name)}</span></th>`).join("")+'</tr>';
   h+='<tr class="sum"><td>Points</td>'+st.map(p=>`<td class="${d(p)}">${p.pts}</td>`).join("")+'</tr>';
@@ -261,7 +261,8 @@ function tableHtml(w,S){
   });
   return h+'</table></div>';
 }
-function setHtml(el,h){const a=el.querySelector(".tw"),l=a?a.scrollLeft:0;el.innerHTML=h;const b=el.querySelector(".tw");if(b)b.scrollLeft=l}
+let SCROLL0=false;
+function setHtml(el,h){const a=el.querySelector(".tw"),l=a&&!SCROLL0?a.scrollLeft:0;el.innerHTML=h;const b=el.querySelector(".tw");if(b)b.scrollLeft=l}
 function lockedNote(w){
   const subs=SUB.filter(s=>s.week===w&&s.picks==null);if(!subs.length)return"";
   const t=new Date(subs[0].reveal_at),ms=t-Date.now();
@@ -305,7 +306,7 @@ function renderHist(){
   setHtml(el,h);
   const S=stats(HW);$("hwk").innerHTML=lockedNote(HW)+(S?tableHtml(HW,S):"");
 }
-function toggleName(e){const t=e.target.closest("[data-u]");if(!t)return;const k=t.dataset.u;OFF.has(k)?OFF.delete(k):OFF.add(k);renderCmp();renderHist()}
+function toggleName(e){const t=e.target.closest("[data-u]");if(!t)return;const k=t.dataset.u;OFF.has(k)?OFF.delete(k):OFF.add(k);SCROLL0=true;renderCmp();renderHist();SCROLL0=false}
 $("cmp").onclick=toggleName;
 $("hist").onclick=e=>{const c=e.target.closest("[data-hw]");if(c){HW=+c.dataset.hw;renderHist();return}toggleName(e)};
 $("rf").onclick=$("rf2").onclick=loadAll;
