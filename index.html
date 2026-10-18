@@ -248,7 +248,7 @@ function tableHtml(w,S){
   const gs=S.gs,st=S.st.slice().sort((a,b)=>OFF.has(a.key)-OFF.has(b.key)),rec=p=>p.wn+"-"+p.ls+(p.ps?"-"+p.ps:"");
   const d=p=>OFF.has(p.key)?"dim":"";
   let h='<div class="mu small" style="margin:6px 0">Tap a name to show or hide that person.</div><div class="tw"><table><tr><th>Game</th>'+st.map(p=>`<th><span class="pn${OFF.has(p.key)?" off":""}" data-u="${esc(p.key)}">${esc(p.name)}</span></th>`).join("")+'</tr>';
-  h+='<tr class="sum"><td>Points</td>'+st.map(p=>`<td class="${d(p)}">${p.pts}</td>`).join("")+'</tr>';
+  h+='<tr class="sum"><td>Score<small>correct picks, SPECIAL counts 2</small></td>'+st.map(p=>`<td class="${d(p)}">${p.pts}</td>`).join("")+'</tr>';
   h+='<tr class="sum"><td>Record</td>'+st.map(p=>`<td class="${d(p)}">${rec(p)}</td>`).join("")+'</tr>';
   gs.forEach(g=>{
     const r=resOf(w,g);
