@@ -170,7 +170,7 @@ function ask(t,yes){return new Promise(res=>{const o=document.createElement("div
 
 async function loadAll(){
   try{
-    const [a,b,c]=await Promise.all([api("/rest/v1/schedule?select=*&order=week,idx"),api("/rest/v1/results?select=*"),api("/rest/v1/submissions_public?select=*&order=updated_at")]);
+    const [a,b,c]=await Promise.all([api("/rest/v1/schedule?select=*&order=week,idx"),api("/rest/v1/results?select=*"),api("/rest/v1/submissions_visible?select=*&order=updated_at")]);
     SCH=a;RES=b;SUB=c;
   }catch(e){$("net").textContent="Couldn't load data: "+e.message;return}
   $("net").textContent="";renderAll();
@@ -229,7 +229,7 @@ $("del").onclick=async()=>{
 
 /* ---------- Compare + History ---------- */
 function stats(w){
-  const gs=gamesOf(w),subs=SUB.filter(s=>s.week===w);
+  const gs=gamesOf(w),subs=SUB.filter(s=>s.week===w&&s.picks!=null);
   if(!subs.length||!gs.length)return null;
   const st=subs.map(s=>{
     const m={};let pts=0,wn=0,ls=0,ps=0;
@@ -260,11 +260,19 @@ function tableHtml(w,S){
   return h+'</table></div>';
 }
 function setHtml(el,h){const a=el.querySelector(".tw"),l=a?a.scrollLeft:0;el.innerHTML=h;const b=el.querySelector(".tw");if(b)b.scrollLeft=l}
+function lockedNote(w){
+  const subs=SUB.filter(s=>s.week===w&&s.picks==null);if(!subs.length)return"";
+  const t=new Date(subs[0].reveal_at),ms=t-Date.now();
+  const when=t.toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:"America/New_York"})+" ET";
+  let left="";if(ms>0){const m=Math.ceil(ms/6e4),d=Math.floor(m/1440),h=Math.floor(m%1440/60),mm=m%60;left=" (in "+(d?d+"d ":"")+(d||h?h+"h ":"")+(d?"":mm+"m")+")"}
+  return `<div class="box"><b>Picks are hidden until ${esc(when)}${esc(left.replace(/ \)/,")"))}.</b><div class="mu small" style="margin-top:4px">${subs.length} in so far: ${subs.map(s=>esc(s.name)).join(", ")}</div></div>`;
+}
 function renderCmp(){
   $("cwk").textContent="Week "+WK;
-  const S=stats(WK);
-  setHtml($("cmp"),S?tableHtml(WK,S):'<div class="mu pad">No submissions yet for Week '+WK+'.</div>');
+  const S=stats(WK),L=lockedNote(WK);
+  setHtml($("cmp"),L+(S?tableHtml(WK,S):L?"":'<div class="mu pad">No submissions yet for Week '+WK+'.</div>'));
 }
+setInterval(()=>{if(view==="cmp"){const n=SUB.find(s=>s.week===WK&&s.picks==null);if(n&&new Date(n.reveal_at)<=Date.now())loadAll();else renderCmp()}},30000);
 let HW=null;
 function renderHist(){
   const el=$("hist"),wks=[...new Set(SUB.map(s=>s.week))].sort((a,b)=>b-a);
@@ -277,7 +285,7 @@ function renderHist(){
   T.forEach(t=>{h+=`<tr><td>${esc(t.name)}</td>`+asc.map(w=>`<td>${t.by[w]==null?"—":t.by[w]}</td>`).join("")+`<td><b>${t.sum}</b></td><td>${t.w}-${t.l}${t.t?"-"+t.t:""}</td></tr>`});
   h+='</table></div><div class="lab">Past weeks</div><div class="hw">'+wks.map(w=>`<button class="pb${w===HW?" on":""}" data-hw="${w}">Week ${w}${w===WK?" (current)":""}</button>`).join("")+'</div><div id="hwk"></div>';
   setHtml(el,h);
-  const S=stats(HW);$("hwk").innerHTML=S?tableHtml(HW,S):"";
+  const S=stats(HW);$("hwk").innerHTML=lockedNote(HW)+(S?tableHtml(HW,S):"");
 }
 function toggleName(e){const t=e.target.closest("[data-u]");if(!t)return;const k=t.dataset.u;OFF.has(k)?OFF.delete(k):OFF.add(k);renderCmp();renderHist()}
 $("cmp").onclick=toggleName;
