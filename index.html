@@ -41,7 +41,8 @@ table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{padding:8px 10px;border-bottom:1px solid var(--bd);text-align:center;white-space:nowrap}
 th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:1}
 tr.sum td{font-weight:700;background:var(--bg)}
-td.c{font-weight:600}td.w{background:var(--win);color:var(--wint)}td.l{background:var(--loss);color:var(--wint)}
+td.c{font-weight:600}td.w{background:var(--win);color:var(--wint)}td.l{background:var(--loss);color:var(--wint)}td.p{background:var(--bd)}
+.p9{display:block;margin:2px auto 0;font-size:9px;font-weight:800;color:var(--mu)}
 td.s{box-shadow:inset 0 0 0 2px var(--gold)}
 td.dim{background:var(--bg);color:var(--mu);font-weight:400;opacity:.6}
 td small{display:block;color:var(--mu);font-weight:400;font-size:11px}
@@ -256,7 +257,7 @@ function tableHtml(w,S){
       const c=p.m[gk(g)];if(!c)return'<td class="mu">—</td>';
       const off=OFF.has(p.key),x=c.p;
       const nm=x.pick==="home"?short(g.home):x.pick==="away"?short(g.away):(x.pick==="over"?"Over ":"Under ")+g.total;
-      return `<td class="c ${off?"dim":c.gr===1?"w":c.gr===-1?"l":""} ${x.special&&!off?"s":""}">${esc(nm)}${x.special?'<span class="s9'+(off?" dim":"")+'">SPECIAL</span>':""}</td>`}).join("")+'</tr>';
+      return `<td class="c ${off?"dim":c.gr===1?"w":c.gr===-1?"l":c.gr===0?"p":""} ${x.special&&!off?"s":""}">${esc(nm)}${c.gr===0&&!off?'<span class="p9">PUSH</span>':""}${x.special?'<span class="s9'+(off?" dim":"")+'">SPECIAL</span>':""}</td>`}).join("")+'</tr>';
   });
   return h+'</table></div>';
 }
