@@ -12,6 +12,7 @@ body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 -apple-system,s
 .side{width:150px;flex:none;position:sticky;top:0;padding:16px 10px;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--bd);min-height:100vh}
 main{flex:1;min-width:0}
 .wrap{max-width:780px;margin:0 auto;padding:16px}
+body.wide .wrap{max-width:1500px}
 h1{font-size:22px;margin:0 0 2px}h2{font-size:16px;margin:0 0 8px}
 .sub,.mu{color:var(--mu);font-size:13px}.small{font-size:12px}.pad{padding:30px 0;text-align:center}
 .err{color:var(--loss);font-size:13px;min-height:18px}.ok{color:var(--mu);font-size:13px;min-height:18px}
@@ -388,6 +389,7 @@ document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{
   view=b.dataset.v;
   document.querySelectorAll("[data-v]").forEach(x=>x.classList.toggle("on",x===b));
   ["submit","cmp","hist","admin"].forEach(v=>$("v-"+v).hidden=v!==view);
+  document.body.classList.toggle("wide",view==="cmp"||view==="hist");
   if(view!=="submit")loadAll();
 });
 setInterval(()=>{if(view==="cmp"||view==="hist")loadAll()},45000);
