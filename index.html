@@ -274,6 +274,19 @@ function renderCmp(){
 }
 setInterval(()=>{if(view==="cmp"){const n=SUB.find(s=>s.week===WK&&s.picks==null);if(n&&new Date(n.reveal_at)<=Date.now())loadAll();else renderCmp()}},30000);
 let HW=null;
+/* Weekly wins: CARRY holds wins through CARRY.through (tracked before this feature). Later weeks count once every game is final; ties split the win. */
+const CARRY={through:5,wins:{"Mike":1.5,"Megan":1,"Taylor":1,"Sarah":1,"Matt":0.5}};
+function weeksWon(asc){
+  const W={};const add=(name,n)=>{const k=nk(name),r=W[k]||(W[k]={name,n:0});r.n+=n};
+  Object.entries(CARRY.wins).forEach(([n,v])=>add(n,v));
+  asc.filter(w=>w>CARRY.through).forEach(w=>{
+    const gs=gamesOf(w);if(!gs.length||!gs.every(g=>{const r=resOf(w,g);return r&&r.final}))return;
+    const S=stats(w);if(!S||!S.st.length)return;
+    const top=Math.max(...S.st.map(p=>p.pts)),ws=S.st.filter(p=>p.pts===top);
+    ws.forEach(p=>add(p.name,1/ws.length));
+  });
+  return Object.values(W).sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name));
+}
 function renderHist(){
   const el=$("hist"),wks=[...new Set(SUB.map(s=>s.week))].sort((a,b)=>b-a);
   if(!wks.length){el.innerHTML='<div class="mu pad">No submissions saved yet.</div>';return}
@@ -281,7 +294,10 @@ function renderHist(){
   const asc=wks.slice().sort((a,b)=>a-b),tot={};
   asc.forEach(w=>{const S=stats(w);if(!S)return;S.st.forEach(p=>{const t=tot[p.key]||(tot[p.key]={name:p.name,by:{},sum:0,w:0,l:0,t:0});t.name=p.name;t.by[w]=p.pts;t.sum+=p.pts;t.w+=p.wn;t.l+=p.ls;t.t+=p.ps})});
   const T=Object.values(tot).sort((a,b)=>b.sum-a.sum||a.name.localeCompare(b.name));
-  let h='<div class="lab">Season totals</div><div class="tw"><table><tr><th>Name</th>'+asc.map(w=>`<th>Wk ${w}</th>`).join("")+'<th>Total</th><th>Record</th></tr>';
+  const WW=weeksWon(asc),fx=n=>+n.toFixed(2);
+  let h='';
+  if(WW.length)h+='<div class="lab">Weeks won <span class="small">(ties split)</span></div><div class="tw"><table><tr><th>Name</th><th>Weeks won</th></tr>'+WW.map(r=>`<tr><td>${esc(r.name)}</td><td><b>${fx(r.n)}</b></td></tr>`).join("")+'</table></div>';
+  h+='<div class="lab">Season totals</div><div class="tw"><table><tr><th>Name</th>'+asc.map(w=>`<th>Wk ${w}</th>`).join("")+'<th>Total</th><th>Record</th></tr>';
   T.forEach(t=>{h+=`<tr><td>${esc(t.name)}</td>`+asc.map(w=>`<td>${t.by[w]==null?"—":t.by[w]}</td>`).join("")+`<td><b>${t.sum}</b></td><td>${t.w}-${t.l}${t.t?"-"+t.t:""}</td></tr>`});
   h+='</table></div><div class="lab">Past weeks</div><div class="hw">'+wks.map(w=>`<button class="pb${w===HW?" on":""}" data-hw="${w}">Week ${w}${w===WK?" (current)":""}</button>`).join("")+'</div><div id="hwk"></div>';
   setHtml(el,h);
