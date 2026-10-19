@@ -1,0 +1,48 @@
+name: Back up picks
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes (GitHub may run it a few minutes late)
+  workflow_dispatch: {}      # lets you run it by hand from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backup-picks
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Open the backups branch
+        run: |
+          git config user.name  "pick-pool-backup"
+          git config user.email "actions@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin backups >/dev/null; then
+            git fetch --depth 1 origin backups
+            git worktree add bk origin/backups
+            git -C bk checkout -B backups
+          else
+            git worktree add --detach bk
+            git -C bk checkout --orphan backups
+            git -C bk rm -rfq .
+            echo "Automatic backups of every pick submission. One file per person per week." > bk/README.md
+          fi
+
+      - name: Pull submissions from Supabase
+        env:
+          SUPABASE_URL: https://tvuefpeicqrkpnyprnnf.supabase.co
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python3 scripts/backup_picks.py bk
+
+      - name: Save changes
+        run: |
+          cd bk
+          git add -A
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -q -m "Picks backup $(TZ=America/New_York date '+%a %b %-d %-I:%M %p ET')"
+          git push -q origin backups
