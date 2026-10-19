@@ -1,12 +1,22 @@
 """Copy every submission from Supabase into picks/week-XX/<name>.json.
 Run by .github/workflows/backup-picks.yml. Files are never deleted, so a pick
 removed from the site still has its last saved copy here."""
-import json, os, re, sys, urllib.request
+import json, os, re, sys, urllib.request, urllib.error
 
 url = os.environ["SUPABASE_URL"].rstrip("/") + "/rest/v1/submissions?select=*&order=week,name"
-key = os.environ["SUPABASE_SERVICE_KEY"]
-req = urllib.request.Request(url, headers={"apikey": key, "Authorization": "Bearer " + key})
-rows = json.load(urllib.request.urlopen(req, timeout=30))
+key = os.environ.get("SUPABASE_SERVICE_KEY", "").strip()
+if not key:
+    sys.exit("SUPABASE_SERVICE_KEY secret is missing or empty.")
+if key.startswith("sb_publishable_"):
+    sys.exit("SUPABASE_SERVICE_KEY is the publishable key. Use the secret / service_role key instead.")
+headers = {"apikey": key}
+if key.startswith("eyJ"):            # legacy service_role key (a JWT)
+    headers["Authorization"] = "Bearer " + key
+req = urllib.request.Request(url, headers=headers)
+try:
+    rows = json.load(urllib.request.urlopen(req, timeout=30))
+except urllib.error.HTTPError as e:
+    sys.exit("Supabase said %s: %s" % (e.code, e.read().decode(errors="replace")[:500]))
 
 out = sys.argv[1]
 for r in rows:
