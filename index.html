@@ -62,7 +62,7 @@ td small{display:block;color:var(--mu);font-weight:400;font-size:11px}
 .mo{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
 .mb{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;max-width:360px;width:100%}
 .mb .row{margin-top:14px;justify-content:flex-end}
-.race{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin:14px 0 30px}
+.race{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin:4px 0 14px}
 .race h2{margin:0 0 6px}.race p{margin:6px 0}.race .alive{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 .race .chip{border:1.5px solid var(--tx);border-radius:10px;padding:6px 10px;font-size:13px}
 .race .chip.win{border-color:var(--gold);box-shadow:0 0 10px rgba(255,196,0,.35)}
@@ -287,7 +287,7 @@ function lockedNote(w){
 function renderCmp(){
   $("cwk").textContent="Week "+WK;
   const S=stats(WK),L=lockedNote(WK);
-  setHtml($("cmp"),L+(S?tableHtml(WK,S)+raceHtml(WK,S):L?"":'<div class="mu pad">No submissions yet for Week '+WK+'.</div>'));
+  setHtml($("cmp"),L+(S?raceHtml(WK,S)+tableHtml(WK,S):L?"":'<div class="mu pad">No submissions yet for Week '+WK+'.</div>'));
 }
 setInterval(()=>{if(view==="cmp"){const n=SUB.find(s=>s.week===WK&&s.picks==null);if(n&&new Date(n.reveal_at)<=Date.now())loadAll();else renderCmp()}},30000);
 let HW=null;
