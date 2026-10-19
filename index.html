@@ -71,9 +71,7 @@ td small{display:block;color:var(--mu);font-weight:400;font-size:11px}
 .flip{transform:scaleX(-1)}
 .mu2{display:flex;align-items:center;gap:10px}.mu2 .at{color:var(--mu);font-weight:600;font-size:14px}
 .pb{display:inline-flex;align-items:center;gap:6px}.pb .hx{width:26px;height:26px;object-fit:contain}
-.gc{display:flex;align-items:center;gap:6px}.gc .hx{width:30px;height:30px;object-fit:contain;flex:none}.gc .tt{line-height:1.2}
-td.c .ci{display:flex;align-items:center;justify-content:center;gap:5px}td.c .ci img{width:24px;height:24px;object-fit:contain}
-@media (max-width:700px){
+.gc{display:flex;align-items:center;gap:6px}.gc .hx{width:30px;height:30px;object-fit:contain;flex:none}.gc .tt{line-height:1.2}@media (max-width:700px){
 .app{flex-direction:column;align-items:stretch}
 .side{width:100%;flex-direction:row;min-height:0;border-right:0;border-bottom:1px solid var(--bd);padding:8px;gap:6px;z-index:5;background:var(--bg)}
 .tabb{flex:1;text-align:center;padding:9px 4px;font-size:12px}
@@ -282,8 +280,7 @@ function tableHtml(w,S){
       const c=p.m[gk(g)];if(!c)return'<td class="mu">—</td>';
       const off=OFF.has(p.key),x=c.p;
       const nm=x.pick==="home"?short(g.home):x.pick==="away"?short(g.away):(x.pick==="over"?"Over ":"Under ")+g.total;
-      const tm=x.pick==="home"?g.home:x.pick==="away"?g.away:null;
-      return `<td class="c ${off?"dim":c.gr===1?"w":c.gr===-1?"l":c.gr===0?"p":""} ${x.special&&!off?"s":""}"><span class="ci">${tm?helm(tm,""):""}${esc(nm)}</span>${c.gr===0&&!off?'<span class="p9">PUSH</span>':""}${x.special?'<span class="s9'+(off?" dim":"")+'">SPECIAL</span>':""}</td>`}).join("")+'</tr>';
+      return `<td class="c ${off?"dim":c.gr===1?"w":c.gr===-1?"l":c.gr===0?"p":""} ${x.special&&!off?"s":""}">${esc(nm)}${c.gr===0&&!off?'<span class="p9">PUSH</span>':""}${x.special?'<span class="s9'+(off?" dim":"")+'">SPECIAL</span>':""}</td>`}).join("")+'</tr>';
   });
   return h+'</table></div>';
 }
