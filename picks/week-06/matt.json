@@ -1,0 +1,81 @@
+{
+  "week": 6,
+  "name": "Matt",
+  "updated_at": "2026-10-18T20:00:08.18776+00:00",
+  "picks": [
+    {
+      "away": "New York Jets",
+      "home": "New England Patriots",
+      "pick": "away",
+      "special": false
+    },
+    {
+      "away": "Baltimore Ravens",
+      "home": "Cleveland Browns",
+      "pick": "home",
+      "special": true
+    },
+    {
+      "away": "Pittsburgh Steelers",
+      "home": "Tampa Bay Buccaneers",
+      "pick": "away",
+      "special": false
+    },
+    {
+      "away": "Tennessee Titans",
+      "home": "Indianapolis Colts",
+      "pick": "away",
+      "special": false
+    },
+    {
+      "away": "New Orleans Saints",
+      "home": "New York Giants",
+      "pick": "home",
+      "special": true
+    },
+    {
+      "away": "Chicago Bears",
+      "home": "Atlanta Falcons",
+      "pick": "away",
+      "special": false
+    },
+    {
+      "away": "Carolina Panthers",
+      "home": "Philadelphia Eagles",
+      "pick": "away",
+      "special": false
+    },
+    {
+      "away": "Arizona Cardinals",
+      "home": "Los Angeles Rams",
+      "pick": "away",
+      "special": false
+    },
+    {
+      "away": "Los Angeles Chargers",
+      "home": "Kansas City Chiefs",
+      "pick": "home",
+      "special": true
+    },
+    {
+      "away": "Buffalo Bills",
+      "home": "Las Vegas Raiders",
+      "pick": "away",
+      "special": false
+    },
+    {
+      "away": "Dallas Cowboys",
+      "home": "Green Bay Packers",
+      "pick": "home",
+      "special": false
+    },
+    {
+      "away": "Washington Commanders",
+      "home": "San Francisco 49ers",
+      "pick": "away",
+      "special": false
+    }
+  ],
+  "id": "d46a09d6-f4d9-4acf-88ca-97031672b2f7",
+  "name_key": "matt"
+}
