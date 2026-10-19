@@ -67,6 +67,12 @@ td small{display:block;color:var(--mu);font-weight:400;font-size:11px}
 .race .chip{border:1.5px solid var(--tx);border-radius:10px;padding:6px 10px;font-size:13px}
 .race .chip.win{border-color:var(--gold);box-shadow:0 0 10px rgba(255,196,0,.35)}
 .race .chip b{font-size:15px}.race .chip .mu{display:block;font-size:12px}
+.hm{width:44px;height:44px;object-fit:contain;flex:none}
+.flip{transform:scaleX(-1)}
+.mu2{display:flex;align-items:center;gap:10px}.mu2 .at{color:var(--mu);font-weight:600;font-size:14px}
+.pb{display:inline-flex;align-items:center;gap:6px}.pb .hx{width:26px;height:26px;object-fit:contain}
+.gc{display:flex;align-items:center;gap:6px}.gc .hx{width:30px;height:30px;object-fit:contain;flex:none}.gc .tt{line-height:1.2}
+td.c .ci{display:flex;align-items:center;justify-content:center;gap:5px}td.c .ci img{width:24px;height:24px;object-fit:contain}
 @media (max-width:700px){
 .app{flex-direction:column;align-items:stretch}
 .side{width:100%;flex-direction:row;min-height:0;border-right:0;border-bottom:1px solid var(--bd);padding:8px;gap:6px;z-index:5;background:var(--bg)}
@@ -149,6 +155,11 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const short=n=>String(n||"").trim().split(/\s+/).pop();
 const nk=n=>String(n||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+/* Helmet images live in /helmets, named by team nickname (e.g. helmets/steelers.png). */
+const HELM=new Set("49ers bears bengals bills broncos browns buccaneers cardinals chargers chiefs colts commanders cowboys dolphins eagles falcons giants jaguars jets lions packers panthers patriots raiders rams ravens saints seahawks steelers texans titans vikings".split(" "));
+const HALIAS={niners:"49ers",bucs:"buccaneers",jags:"jaguars",pats:"patriots",team:"commanders",washington:"commanders",redskins:"commanders",pittsburgh:"steelers",cincinnati:"bengals",baltimore:"ravens",cleveland:"browns",buffalo:"bills",miami:"dolphins",houston:"texans",indianapolis:"colts",jacksonville:"jaguars",tennessee:"titans",denver:"broncos",kansascity:"chiefs",lasvegas:"raiders",oakland:"raiders",dallas:"cowboys",philadelphia:"eagles",chicago:"bears",detroit:"lions",greenbay:"packers",minnesota:"vikings",atlanta:"falcons",carolina:"panthers",neworleans:"saints",tampabay:"buccaneers",tampa:"buccaneers",arizona:"cardinals",sanfrancisco:"49ers",seattle:"seahawks",newengland:"patriots"};
+function helmKey(n){const s=nk(short(n)),f=nk(n);if(HELM.has(s))return s;for(const k of HELM)if(f.endsWith(k))return k;return HALIAS[s]||HALIAS[f]||null}
+const helm=(n,c)=>{const k=helmKey(n);return k?`<img class="${c}" src="helmets/${k}.png" alt="" loading="lazy" onerror="this.remove()">`:""};
 function curWeek(){const d=new Date();d.setHours(0,0,0,0);const days=Math.round((d-new Date(2026,8,8))/864e5);return Math.min(18,Math.max(1,Math.floor(days/7)+1))}
 const WK=curWeek();
 let TOKEN=null;try{TOKEN=sessionStorage.getItem("np_tok")}catch(e){}
@@ -199,9 +210,9 @@ function renderForm(){
   if(!gs.length){el.innerHTML='<div class="mu pad">No schedule posted for Week '+WK+' yet. Check back soon.</div>';return}
   el.innerHTML=gs.map(g=>{
     const p=PICKS[gk(g)]||{};
-    const opts=[["away",short(g.away)+" "+sl(g,"away")],["home",short(g.home)+" "+sl(g,"home")]];
+    const opts=[["away",short(g.away)+" "+sl(g,"away"),g.away],["home",short(g.home)+" "+sl(g,"home"),g.home]];
     if(parseFloat(g.total)>0)opts.push(["over","Over "+g.total],["under","Under "+g.total]);
-    return `<div class="card${p.special?" sp":""}" data-k="${esc(gk(g))}"><div class="mt">${esc(short(g.away))} @ ${esc(short(g.home))}</div><div class="ln">${esc(g.line||"")}</div><div class="pk">${opts.map(([k,t])=>`<button class="pb${p.pick===k?" on":""}" data-p="${k}">${esc(t.trim())}</button>`).join("")}<button class="pb${p.special?" gold":""}" data-s="1">SPECIAL</button></div></div>`}).join("");
+    return `<div class="card${p.special?" sp":""}" data-k="${esc(gk(g))}"><div class="mt mu2">${helm(g.away,"hm")}<span>${esc(short(g.away))}</span><span class="at">@</span><span>${esc(short(g.home))}</span>${helm(g.home,"hm flip")}</div><div class="ln" style="margin-top:4px">${esc(g.line||"")}</div><div class="pk">${opts.map(([k,t,tm])=>`<button class="pb${p.pick===k?" on":""}" data-p="${k}">${tm?helm(tm,"hx"):""}${esc(t.trim())}</button>`).join("")}<button class="pb${p.special?" gold":""}" data-s="1">SPECIAL</button></div></div>`}).join("");
 }
 $("form").onclick=e=>{
   const c=e.target.closest(".card");if(!c)return;
@@ -267,11 +278,12 @@ function tableHtml(w,S){
   gs.forEach(g=>{
     const r=resOf(w,g);
     const s2=r?(r.final?esc(r.away_score+"-"+r.home_score):(r.away_score!=null?esc((r.status||"Live")+" "+r.away_score+"-"+r.home_score):"")):"";
-    h+=`<tr><td>${esc(short(g.away))} @ ${esc(short(g.home))}${s2?"<small>"+s2+"</small>":""}</td>`+st.map(p=>{
+    h+=`<tr><td><div class="gc">${helm(g.away,"hx")}<div class="tt">${esc(short(g.away))} @ ${esc(short(g.home))}${s2?"<small>"+s2+"</small>":""}</div>${helm(g.home,"hx flip")}</div></td>`+st.map(p=>{
       const c=p.m[gk(g)];if(!c)return'<td class="mu">—</td>';
       const off=OFF.has(p.key),x=c.p;
       const nm=x.pick==="home"?short(g.home):x.pick==="away"?short(g.away):(x.pick==="over"?"Over ":"Under ")+g.total;
-      return `<td class="c ${off?"dim":c.gr===1?"w":c.gr===-1?"l":c.gr===0?"p":""} ${x.special&&!off?"s":""}">${esc(nm)}${c.gr===0&&!off?'<span class="p9">PUSH</span>':""}${x.special?'<span class="s9'+(off?" dim":"")+'">SPECIAL</span>':""}</td>`}).join("")+'</tr>';
+      const tm=x.pick==="home"?g.home:x.pick==="away"?g.away:null;
+      return `<td class="c ${off?"dim":c.gr===1?"w":c.gr===-1?"l":c.gr===0?"p":""} ${x.special&&!off?"s":""}"><span class="ci">${tm?helm(tm,""):""}${esc(nm)}</span>${c.gr===0&&!off?'<span class="p9">PUSH</span>':""}${x.special?'<span class="s9'+(off?" dim":"")+'">SPECIAL</span>':""}</td>`}).join("")+'</tr>';
   });
   return h+'</table></div>';
 }
